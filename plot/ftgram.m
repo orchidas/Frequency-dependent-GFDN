@@ -1,35 +1,33 @@
 function [X, ax] = ftgram(x, fs, typename, varargin)
-% FBGRAM - compute, plot short-time filter bank output
+% FTGRAM - compute, plot short-time Fourier rransform
 %
-% [X, AX] = fbgram(x, FS, TYPE, VARARGIN) returns X, the short-time filter bank
-% output of the input x, computed using stfb().  The STFB is plotted using
+% [X, AX] = ftgram(x, FS, TYPE, VARARGIN) returns X, the short-time Fourier
+% transform of the input x, computed using stft().  The STFT is plotted using
 % the sampling rate FS in Hz according to the string TYPE and parameters
-% specified in name, value pairs.  The variable TYPE can be 'rir' or 'music';
-% it sets the defaults for the spectrogram and plotting parameters described
-% below.
+% specified in name, value pairs.  The variable TYPE can be 'rir', 'music' or
+% 'speech'; it sets the defaults for the spectrogram and plotting parameters
+% described below.
 %
-% NAME = [RIR_DEFAULT MUSIC_DEFAULT];   %% DESCRIPTION, UNITS
+% NAME = [RIR_DEFAULT MUSIC_DEFAULT SPEECH_DEFAULT];   %% DESCRIPTION, UNITS
 %
-% STFB parameters
-% 'nbins' = [96 480];  %% filter bank window half length, bins
-% 'nskip' = nbins/2;  %% hop size, samples
-% fb = 125*2.^([-2:0.5:7]');  %% band center frequencies, Hz
-% order = 2;  %% filter bank band splitting filter order, poles
+% STFT parameters
+% 'nbins' = [512 2048 512];  %% dft half length, bins
+% 'nskip' = nbins/2;  %% stft hop size, samples
 % 
 % spectrogram image axes
-% 'dbrange' = [80 60];   %% gram dynamic range, dB
-% 'logf' = [true true];  %% logarithmic frequency axis, indicator
-% 'logt' = [true false]; %% logarithmic time axis, indicator
-% 'ms' = [true false];   %% time/frequency axis ms/kHz scaling, indicator
+% 'dbrange' = [80 60 60]; %% gram dynamic range, dB
+% 'logf' = [true true false]; %% logarithmic frequency axis, indicator
+% 'logt' = [true false false];    %% logarithmic time axis, indicator
+% 'ms' = [true false false];   %% time/frequency axis ms/kHz scaling, indicator
 % 
 % waveform onset trimming
-% 'trim' = [true false]; %% trim waveform onset, indicator
+% 'trim' = [true false false]; %% trim waveform onset, indicator
 % 'preroll' = 10; %% onset zeropad duration, milliseconds
-% 'onsetlevel' = 1e-2;   %% onset level, fraction
+% 'onsetlevel' = 1e-2;	%% onset level, fraction
 % 
 % waveform plot parameters
-% 'waveform' = [true false];    %% plot waveform, indicator
-% 'tanhflag' = [true false];    %% hyperbolic tangent saturation, indicator
+% 'waveform' = [true false false];    %% plot waveform, indicator
+% 'tanhflag' = [true false false];    %% hyperbolic tangent saturation, indicator
 % 'tanhbeta' = 5; %% hyperbolic tangent saturation parameter, ratio
 %
 % The return variable AX contains the plot axes, one for each spectrogram
@@ -37,23 +35,27 @@ function [X, ax] = ftgram(x, fs, typename, varargin)
 %
 % See Also: STFT, IRGRAM.
 
-% Created: 18-Mar-2012.
-% Revised: 18-Mar-2012, JSA, v1.
-% Version: v1.
+% Created:  2-Feb-2011.
+% Revised:  2-Feb-2011, MJW w/JSA, v1.
+% Revised: 14-Mar-2012, JSA, v2 - interface, windowing reworked.
+% Revised: 11-Jun-2012, JSA, v3 - nbins default changed for 'music' setting.
+% Revised: 22-Aug-2013, JSA, v4 - seismic frequency range flag added.
+% Version: v4.
 
 
 %% initialization, parse input
 
 % initialize type defaults
-nbins_default = [96 480];    %% dft half length, bins
-fb_default = 125*2.^([-2:0.5:7]');  %% band center frequencies, Hz
-order_default = 2;  %% filter bank band splitting filter order, poles
+nbins_default = [512 2048 512];    %% dft half length, bins
+% nskip_default = nbins/2;      %% stft hop size, samples
 
 dbrange_default = [80 60 60];   %% gram dynamic range, dB
 logf_default = [true true false];   %% logarithmic frequency axis, indicator
 logt_default = [true false false];  %% logarithmic time axis, indicator
 logtmin_default = [10 10 10];  %% logarithmic time axis offset, milliseconds
 ms_default = [true false false];    %% time/frequency axis ms/kHz scaling, indicator
+
+seismic_default = false;    %% seismic frequency axis, indicator
 
 trim_default = [true false false];  %% trim waveform onset, indicator
 preroll_default = 10*[1 1 1];   %% onset zeropad duration, milliseconds
@@ -71,6 +73,9 @@ switch typename,
     case 'music',
         % music input
         type = 2;
+    case 'speech',
+        % speech input
+        type = 3;
     otherwise,
         % music default
         type = 2;
@@ -87,8 +92,6 @@ p.addRequired('typename', @(x)ischar(x));   %% sampling rate, Hz
 % stft parameters
 p.addParamValue('nbins', nbins_default(type), @(x)isnumeric(x));
 p.addParamValue('nskip', 0, @(x)isnumeric(x));
-p.addParamValue('fb', fb_default, @(x)isnumeric(x));
-p.addParamValue('order', order_default, @(x)isnumeric(x));
 
 % spectrogram image axes
 p.addParamValue('dbrange', dbrange_default(type), @(x)isnumeric(x));
@@ -96,6 +99,9 @@ p.addParamValue('logf', logf_default(type), @(x)islogical(x));
 p.addParamValue('logt', logt_default(type), @(x)islogical(x));
 p.addParamValue('logtmin', logtmin_default(type), @(x)isnumeric(x));
 p.addParamValue('ms', ms_default(type), @(x)islogical(x));
+
+p.addParamValue('seismic', seismic_default, @(x)islogical(x));
+
 
 % waveform onset trimming
 p.addParamValue('trim', trim_default(type), @(x)islogical(x));
@@ -116,14 +122,14 @@ if (p.Results.nskip > 0);
 else,
     nskip = nbins/2;
 end;
-fb = p.Results.fb(find(p.Results.fb < fs/2));
-order = p.Results.order;
 
 dbrange = p.Results.dbrange;
 logf = p.Results.logf;
 logt = p.Results.logt;
 logtmin = p.Results.logtmin;
 ms = p.Results.ms;
+
+seismic = p.Results.seismic;
 
 trim = p.Results.trim;
 preroll = p.Results.preroll;
@@ -153,7 +159,7 @@ end;
 nsamp = size(x,1);
 
 % compute, normalize spectrogram
-X = stfb(x, nbins, nskip, fb*2/fs, order);
+X = stft(x, nbins, nskip);
 nframes = size(X,2)/nc;
 
 y = x/max(max(abs(x)));
@@ -181,7 +187,7 @@ if waveform,
         semilogx(tscale*(t+logtmin/1000), y); grid;
         xlim(tscale*[logtmin/1000 logtmin/1000+nsamp/fs]);
         n = get(gca,'Xtick');
-        set(gca,'XTickLabel',sprintf('%g |', n'));
+        set(gca,'XTickLabel',sprintf('%g\n', n'));
     else,
         plot(tscale*t, y); grid;
         xlim(tscale*[0 nsamp/fs]);
@@ -209,8 +215,8 @@ tscale = (~ms)*1 + ms*1000;
 np = ceil(nbins/(2*nskip));
 nq = ceil((nsamp-(nframes-1)*nskip-nbins/2)/nskip);
 t = tscale * ([-np:nframes-1+nq]*nskip + nbins/2)/fs;
-f = 1/tscale * [eps; exp(mean(log([fb(1:end-1) fb(2:end)]), 2)); fs/2];
-Y = Y([[1:end] end],:);
+f = 1/tscale * fs/2*[0:nbins]/nbins;
+f(1) = eps;
 
 % loop through specgtrograms
 for s = [1:nc],
@@ -228,7 +234,7 @@ for s = [1:nc],
 
     % display spectrogram
     offset = logt * tscale*logtmin/1000;
-    surf(t+offset, f, Y(:, (s-1)*nframes + [ones(1,np) [1:nframes] nframes*ones(1,nq)]), 'edgecolor', 'none');
+    surf(t+offset, f, Y(1:nbins+1, (s-1)*nframes + [ones(1,np) [1:nframes] nframes*ones(1,nq)]), 'edgecolor', 'none');
     axis tight;
     view(0,90);
 
@@ -256,21 +262,40 @@ for s = [1:nc],
 
         xlim(tscale*[logtmin/1000 logtmin/1000+nsamp/fs]);
         n = get(gca,'Xtick');
-        set(gca,'XTickLabel',sprintf('%g |', n'));
+        set(gca,'XTickLabel',sprintf('%g\n', n'));
 
     end;
 
     % scale, label frequency axis
     if logf,
-        divs = [50 100 200 500 1000 2000 5000 10000 20000]/tscale;
-        set(gca, 'ytickmode', 'manual');
-        set(gca, 'ytick', divs);
+        if seismic,
+            % seismic frequency axis
+            divs = [10 20 50 100 200 500 1000]/tscale;
+            set(gca, 'ytickmode', 'manual');
+            set(gca, 'ytick', divs);
 
-        ylim([min(divs) max(divs)]);
+            ylim([min(divs) min(fs/2,max(divs))]);
+
+        else,
+            % audio frequency axis
+            divs = [50 100 200 500 1000 2000 5000 10000 20000]/tscale;
+            set(gca, 'ytickmode', 'manual');
+            set(gca, 'ytick', divs);
+
+            ylim([min(divs) max(divs)]);
+
+        end;
 
     else,
-        ylim([0 20000]/tscale);
+        if seismic,
+            % seismic frequency axis
+            ylim([0 min(fs/2,1000)]/tscale);
 
+        else,
+            % audio frequency axis
+            ylim([0 20000]/tscale);
+
+        end;
     end;
 
     % display color bar
@@ -284,8 +309,10 @@ for s = [1:nc],
         temp = get(B, 'Position');
         set(B, 'Position', [0.916 temp(2)+0.004 0.015 temp(4)]);
     end;
-    colormap(jet);
+    colormap(parula);
     ylabel(B,'Energy (dB)');
+%     set(get(B, 'Label'), 'Position', [3.75 -40.0 0]);
+
 
 end;
 
