@@ -1,3 +1,12 @@
 <h2> Grouped feedback delay networks with frequency-dependent coupling </h2>
 
-<p> Contains all scripts to reproduce plot in the paper <i>Grouped Feedback Delay Netwoks with Frequency-dependent Coupling </i> - O. Das, S. J. Schlecht, E. De Sena, IEEE Trans. Aud. Speech and Lang. Processing (to appear) </p>
+<p> Contains all scripts to reproduce plots in the paper O. Das, S. J. Schlecht, E. De Sena. "Grouped Feedback Delay Netwoks with Frequency-dependent Coupling" -  in IEEE/ACM Trans. Aud. Speech and Lang. Process. (to appear) </p>
+
+<p> Grouped feedback delay networks are an efficient means of modeling coupled room acoustics in real-time. They combine multiple feedback delay networks in parallel with a coupled mixing matrix (Das et al.). In this work, we extend the design of coupled mixing matrices to include FIR filters and propose theorems to maintain stability and losslessness of the network (Schlecht et al.). We use these theorems to model diffraction at the aperture connecting multiple rooms. </p>
+
+<h3> References </h3>
+
+<ul>
+	<li> O. Das, and J. S. Abel. "Grouped feedback delay networks for modeling of coupled spaces." Journal of the Audio Engineering Society 69, no. 7/8 (2021): 486-496. </li>
+	<li> S.J. Schlecht, and E. AP Habets. "Scattering in feedback delay networks." IEEE/ACM Trans. Aud. Speech and Lang. Process. 28 (2020): 1915-1924.</li>
+</ul>
