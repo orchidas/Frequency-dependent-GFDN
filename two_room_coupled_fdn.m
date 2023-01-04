@@ -18,8 +18,8 @@ nGrp = 2;
 nset = ndel/nGrp;
 nSize = nset .* ones(nGrp,1);
 %input gains
-b_drive = [-0.9002, 0.9774, 0.2956, -0.6900, -0.2238, 0.2147, 0.4905, -0.6664, zeros(1,nset)].'; % source in small room 
-
+% source in small room 
+b_drive = [-0.9002, 0.9774, 0.2956, -0.6900, -0.2238, 0.2147, 0.4905, -0.6664, zeros(1,nset)].'; 
 %output gains
 c_drive = [zeros(nset,1); ones(nset,1)];  
 
@@ -108,11 +108,18 @@ type = 'none';
 L = 2;   %length of impulse response to be calculated
 nsamp = L*fs;
 
-[zAbsorption, feedbackMatrix, inputGain, outputGain, directGain] = convert_to_FDNTB_params(1, nset, b(1:nset,:), a(1:nset,:), theta(1), b_drive(1:nset), ones(nset,1), d);
-h_r1 = dss2impz(nsamp, tau(1:nset).', feedbackMatrix, inputGain, outputGain, directGain,'absorptionFilters', zAbsorption);
+[zAbsorption, feedbackMatrix, inputGain, outputGain, directGain] = ...
+    convert_to_FDNTB_params(1, nset, b(1:nset,:), a(1:nset,:), theta(1), ...
+    b_drive(1:nset), ones(nset,1), d);
+h_r1 = dss2impz(nsamp, tau(1:nset).', feedbackMatrix, inputGain, outputGain,...
+    directGain,'absorptionFilters', zAbsorption);
 
-[zAbsorption, ~, inputGain, outputGain, directGain] = convert_to_FDNTB_params(1, nset, b(nset+1:end,:), a(nset+1:end,:), theta(2), b_drive(1:nset), ones(nset,1), d);
-h_r2 = dss2impz(nsamp, tau(nset+1:end).', feedbackMatrix, inputGain, outputGain, directGain,'absorptionFilters', zAbsorption);
+[zAbsorption, ~, inputGain, outputGain, directGain] = ...
+    convert_to_FDNTB_params(1, nset, b(nset+1:end,:), a(nset+1:end,:), theta(2),...
+    b_drive(1:nset), ones(nset,1), d);
+
+h_r2 = dss2impz(nsamp, tau(nset+1:end).', feedbackMatrix, inputGain, outputGain, ...
+    directGain,'absorptionFilters', zAbsorption);
 
 
 % save results
@@ -178,18 +185,24 @@ for i = 1:length(aperture)
 
     %% coupled FDN with FDNTB 
 
-    %with filters in the mixing matrix
+    % with filters in the mixing matrix
     couplingMatrixFilter = two_room_coupling_matrix(aperture(i), b_diff, coupling_areas);
-    [zAbsorption, feedbackMatrix, inputGain, outputGain, directGain] = convert_to_FDNTB_params(nGrp, nSize, b, a, theta, b_drive, c_drive, d, ...
+    [zAbsorption, feedbackMatrix, inputGain, outputGain, directGain] = ...
+        convert_to_FDNTB_params(nGrp, nSize, b, a, theta, b_drive, c_drive, d, ...
         'couplingMatrix', couplingMatrixFilter);
-    h_coup_freq = dss2impz(nsamp, tau.', feedbackMatrix, inputGain, outputGain, directGain,'absorptionFilters', zAbsorption);
+    h_coup_freq = dss2impz(nsamp, tau.', feedbackMatrix, inputGain, outputGain,...
+        directGain,'absorptionFilters', zAbsorption);
     h_coup_freq = h_coup_freq(:,lis_pos);
 
+    
      % no filters in the mixing matrix
-    couplingMatrixScalar = reshape([1, (pi*aperture(i)^2)/coupling_areas(1); -(pi*aperture(i)^2)/coupling_areas(2), 1], [2,2,1]);
-    [zAbsorption, feedbackMatrix, inputGain, outputGain, directGain] = convert_to_FDNTB_params(nGrp, nSize, b, a, theta, b_drive, c_drive, d, ...
+    couplingMatrixScalar = reshape([1, (pi*aperture(i)^2)/coupling_areas(1); ...
+        -(pi*aperture(i)^2)/coupling_areas(2), 1], [2,2,1]);
+    [zAbsorption, feedbackMatrix, inputGain, outputGain, directGain] = ...
+        convert_to_FDNTB_params(nGrp, nSize, b, a, theta, b_drive, c_drive, d, ...
         'couplingMatrix', couplingMatrixScalar);
-    h_coup = dss2impz(nsamp, tau.', feedbackMatrix, inputGain, outputGain, directGain,'absorptionFilters', zAbsorption);
+    h_coup = dss2impz(nsamp, tau.', feedbackMatrix, inputGain, outputGain,...
+        directGain,'absorptionFilters', zAbsorption);
     h_coup = h_coup(:,lis_pos);
 
    
@@ -209,8 +222,10 @@ for i = 1:length(aperture)
         set(hfig, NameArray, ValueArray);
 
         %plot NEDs with and without filter feedback matrix
-        semilogx(tscale*(time_off(ned_start:ned_end)+logtmin/1000), circshift(ned_freq(ned_start:ned_end),tau(1))+offset(i),'k', 'LineWidth', 0.5);hold on;
-        semilogx(tscale*(time_off(ned_start:ned_end)+logtmin/1000), circshift(ned(ned_start:ned_end),tau(1))+offset(i),'k', 'LineWidth', 0.75,...
+        semilogx(tscale*(time_off(ned_start:ned_end)+logtmin/1000), ...
+            circshift(ned_freq(ned_start:ned_end),tau(1))+offset(i),'k', 'LineWidth', 0.5);hold on;
+        semilogx(tscale*(time_off(ned_start:ned_end)+logtmin/1000), ...
+            circshift(ned(ned_start:ned_end),tau(1))+offset(i),'k', 'LineWidth', 0.75,...
             'LineStyle', '--');hold on;
 
         text(400,1.5*i-1, ['aperture = ' num2str(round(aperture(i),3)),' m'], 'FontSize',7);
@@ -248,25 +263,35 @@ for i = 1:length(aperture)
             subplot(1,2,j)
             %if turning point is negative, single slope decay is observed
             if tp_x < 0
-                hfig = plot(t_env, ([mag2db(ir_env) mag2db(ir_fit) 20*log10(exp(1))*line2]+offset));hold on;grid on;
-                set(hfig,{'Linestyle','Color','LineWidth'},{'-',col(2,:),1.3;'--',col(3,:),1.3;':',col(4,:),1});
+                hfig = plot(t_env, ([mag2db(ir_env) mag2db(ir_fit) ...
+                    20*log10(exp(1))*line2]+offset));
+                hold on;grid on;
+                set(hfig,{'Linestyle','Color','LineWidth'},{'-',col(2,:),1.3;...
+                    '--',col(3,:),1.3;':',col(4,:),1});
 
             else
-                hfig = plot(t_env, ([mag2db(ir_env) mag2db(ir_fit) 20*log10(exp(1))*line1 20*log10(exp(1))*line2]+offset));hold on;grid on;
-                set(hfig,{'Linestyle','Color','LineWidth'},{'-',col(2,:),1.3;'--',col(3,:),1.3;':',col(4,:),1;':',col(4,:),1});
+                hfig = plot(t_env, ([mag2db(ir_env) mag2db(ir_fit) ...
+                    20*log10(exp(1))*line1 20*log10(exp(1))*line2]+offset));
+                hold on;grid on;
+                set(hfig,{'Linestyle','Color','LineWidth'},{'-',col(2,:),1.3;...
+                    '--',col(3,:),1.3;':',col(4,:),1;':',col(4,:),1});
 
             end
-            plot(tp_x, 20*log10(exp(1))*tp_y + offset, 'bo', 'MarkerSize',5, 'MarkerFaceColor','b');hold on;
+            plot(tp_x, 20*log10(exp(1))*tp_y + offset, 'bo', 'MarkerSize',5, 'MarkerFaceColor','b');
+            hold on;
             xpos = find(t_env >= 0.5, 1, 'first');
-            text(t_env(xpos),mag2db(ir_env(xpos))+offset+10, ['a =' num2str(round(aperture(i),3)),' m'], 'FontSize',7, 'interpreter','latex');
+            text(t_env(xpos),mag2db(ir_env(xpos))+offset+10, ['a =' num2str(round(aperture(i),3)),' m'],...
+                'FontSize',7, 'interpreter','latex');
             drawnow;
         end
         offset = offset+40;
 
     end
     %% play and save IR
-%      audiowrite(['audio/coupled_aperture=',num2str(round(aperture(i),3)),'_freq_', des,'.wav'],h_coup_freq./max(abs(h_coup_freq)),fs);
-%      audiowrite(['audio/coupled_aperture=',num2str(round(aperture(i),3)),'_', des,'.wav'],h_coup./max(abs(h_coup)),fs);
+%      audiowrite(['audio/coupled_aperture=',num2str(round(aperture(i),3)),...
+%                 '_freq_', des,'.wav'], h_coup_freq./max(abs(h_coup_freq)),fs);
+%      audiowrite(['audio/coupled_aperture=',num2str(round(aperture(i),3)),...
+%                  '_', des,'.wav'], h_coup./max(abs(h_coup)),fs);
 %      soundsc(h_coup,fs); pause(2); soundsc(h_coup_freq,fs);
 
 end
@@ -274,7 +299,7 @@ end
 %% save figures 
 
 if plot_ir
-    %% coupled RIR
+    % coupled RIR
     off = [offset; offset+1];
     yticks(off(:)'); yticklabels({'0','1','0','1','0','1','0','1','0','1'});
     set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
@@ -282,7 +307,7 @@ if plot_ir
 
 %% PRODUCES FIGURE 5
 elseif plot_2_stage
-    %% 2 stage decay
+    % two stage decay
 
     ttl = {'Scalar feedback matrix', 'Filter feedback matrix'};
     for j = 1:2

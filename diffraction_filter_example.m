@@ -60,7 +60,6 @@ for i = 1:length(aperture)
     
     sigma = pi * aperture(i)^2;  %assuming circular aperture
     fun = @(angle) sigma * (sinc((k * aperture(i))/pi * sin(angle)).^2).*sin(angle);
-    % fun = @(angle) (sigma/cos(angle)) * sinc((k * aperture(i))/pi * sin(angle)).^2;
     tau_avg = 2*integral(fun, 0 , pi/2, 'ArrayValued',true); 
 
     % we know that the transmission coefficient should be 1 for high
@@ -69,12 +68,10 @@ for i = 1:length(aperture)
     tau_avg(cutoff:end) = 1.0;
     startFrom = find(k*aperture(i) >= 3, 1, 'first');
     %interpolation to avoid abrupt jump
-    tau_avg(startFrom:cutoff) = linspace(tau_avg(startFrom), tau_avg(cutoff), length(startFrom:cutoff));
+    tau_avg(startFrom:cutoff) = linspace(tau_avg(startFrom), tau_avg(cutoff), ...
+        length(startFrom:cutoff));
 
-%   use Parks mcClellan to design FIR filter
-%     F = [0; freqs(cutoff-1)/(Fs/2); freqs(cutoff+1)/(Fs/2); 1];
-%     A = [tau_avg(1); tau_avg(cutoff); tau_avg(end)];
-%     [win_len, f0, a0, w] = firpmord(F.',A.',[0.1, 0.01, 0.1],fs);
+    % use Parks mcClellan to design FIR filter
     tau_pm = firpm(win_len-1, freqs/(Fs/2), tau_avg); 
     [H_pm,~] = freqz(tau_pm,1,nfreq);
 
@@ -112,9 +109,9 @@ for i = 1:length(aperture)
 end
 
 fig;hold off;
-set([ax1,ax2],'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+set([ax1,ax2],'FontUnits','points', 'FontWeight','normal', 'FontSize', 8, 'FontName','Times');
 legend(leglines,lgdstr);
-print('figures/diffraction_filter.eps', '-depsc');
+% print('figures/diffraction_filter.eps', '-depsc');
 
 
 

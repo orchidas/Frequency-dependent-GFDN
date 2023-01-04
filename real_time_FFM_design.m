@@ -90,19 +90,21 @@ for i = 1:length(phi)
 %                     H_exp = closed_form_magnitude_response(phi(i), beta(m), w, j, k);
 %                     
 %                     figure(1); subplot(N,N,count);
-%                     semilogx(w * fs/2, mag2db(abs(H)), 'Color', color_gradient(m,:,i)); grid on; hold on;          
+%                     semilogx(w * fs/2, mag2db(abs(H)), 'Color', color_gradient(m,:,i)); 
+%                     grid on; hold on;          
 %                     xlim([200, fs/2]); ylim([-60, 10]);
 %                     xlabel('Frequency (Hz)'); ylabel('Magnitude (dB)');
 %                     axis square; 
 %                  
 %                     figure(2); subplot(N,N,count);
-%                     semilogx(w * fs/2, mag2db(abs(H_exp)), 'Color', color_gradient(m,:,i)); grid on; hold on;          
+%                     semilogx(w * fs/2, mag2db(abs(H_exp)), 'Color', color_gradient(m,:,i)); 
+%                     grid on; hold on;          
 %                     xlim([200, fs/2]); ylim([-60, 10]);
 %                     xlabel('Frequency (Hz)'); ylabel('Magnitude (dB)');
 %                     axis square;
-%                    
-%                     
-% %                     set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+%                                    
+%                     set(gca, 'FontUnits','points', 'FontWeight','normal', ...
+%                         'FontSize',8, 'FontName','Times');
 %                     drawnow;
 %                 end
 
@@ -112,8 +114,6 @@ for i = 1:length(phi)
            lgdstr{i} = strcat('$\bar{\phi} = $', num2str(round(phi(i)/(pi/4),3)));
         end
     end
-    
-  
 end
 
 %% plot legend and save
@@ -127,7 +127,7 @@ Lgnd.Position(1) = 0.43;
 Lgnd.Position(2) = 0.45;
 Lgnd.Interpreter = 'latex';
 
-print('figures/real_time_paraunitary_zeros.eps', '-depsc');
+% print('figures/real_time_paraunitary_zeros.eps', '-depsc');
 
 
 %% 
@@ -137,7 +137,8 @@ print('figures/real_time_paraunitary_zeros.eps', '-depsc');
 function [H_exp] = closed_form_magnitude_response(phi, beta, w, i, j)
     
     if (i == j)
-        H_exp = sqrt(cos(phi)^4 + sin(phi)^4 + (2*(cos(phi)^2)*(sin(phi)^2)).*cos(w - beta));
+        H_exp = sqrt(cos(phi)^4 + sin(phi)^4 + (2*(cos(phi)^2)*(sin(phi)^2))...
+            .*cos(w - beta));
     else
         H_exp = sqrt(sin(2*phi).*(1-cos(w-beta)));
     end
@@ -192,7 +193,7 @@ end
 
 
 function [color_gradient] = create_color_gradient(col1, col2, nterms)
-    color_gradient = [linspace(col1(1),col2(1),nterms)', linspace(col1(2),col2(2),nterms)'...
-        , linspace(col1(3),col2(3),nterms)'];
+    color_gradient = [linspace(col1(1),col2(1),nterms)',...
+        linspace(col1(2),col2(2),nterms)',linspace(col1(3),col2(3),nterms)'];
 end
 

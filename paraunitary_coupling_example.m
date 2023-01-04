@@ -54,7 +54,8 @@ for i = 1:Nrooms
             continue;
         else
             shift = (win_len(i,j)+1)/2;
-            couplingMatrix(i,j,midPoint-shift+1:midPoint+shift-1) = (pi*(aperture(i,j)^2))/sqrt(coupling_areas(i,j)*coupling_areas(j,i)) ...
+            couplingMatrix(i,j,midPoint-shift+1:midPoint+shift-1) = ...
+                (pi*(aperture(i,j)^2))/sqrt(coupling_areas(i,j)*coupling_areas(j,i)) ...
                 .* filter_coefs(i,j,1:win_len(i,j));
         end
     end
@@ -72,14 +73,17 @@ originalMatrix_freq = fft(originalMatrix, Nfft, 3);
 %% PRODUCES FIGURE 6A
 % plot time domain filters
 figure('Units','inches', 'Position',[0 0 2.9 2.5],'PaperPositionMode','auto');
-[~, pHDes] = plotImpulseResponseMatrix(0:(degree-1), originalMatrix, 'save', 1, 'colors', [0, 0.4470, 0.7410]...
-   ,'ylim', [-0.01,0.01], 'title', 'Initial matrix', 'stemFlag', 0, 'xlabel', 'Samples', 'ylabel', 'Amplitude'); hold on;
+[~, pHDes] = plotImpulseResponseMatrix(0:(degree-1), originalMatrix, 'save', 1, ...
+   'colors', [0, 0.4470, 0.7410],'ylim', [-0.01,0.01], 'title', 'Initial matrix', ...
+   'stemFlag', 0, 'xlabel', 'Samples', 'ylabel', 'Amplitude'); hold on;
 print('figures/3x3_couplingMatrix_init.eps', '-depsc');
 
 
 figure('Units','inches', 'Position',[0 0 2.9 2.5],'PaperPositionMode','auto');
-[~, perFreqProcrustes] = plotImpulseResponseMatrix(0:(degree-1), couplingMatrix, 'save', 1, 'colors', [0.8500, 0.3250, 0.0980]...
-   ,'ylim', [-0.01,0.01] , 'title', 'Per-Frequency Procrustes', 'stemFlag',0, 'xlabel', 'Samples', 'ylabel', 'Amplitude'); 
+[~, perFreqProcrustes] = plotImpulseResponseMatrix(0:(degree-1), couplingMatrix, ...
+    'save', 1, 'colors', [0.8500, 0.3250, 0.0980], 'ylim', [-0.01,0.01] , ...
+    'title', 'Per-Frequency Procrustes', 'stemFlag',0, ...
+    'xlabel', 'Samples', 'ylabel', 'Amplitude'); 
 print('figures/3x3_couplingMatrix_pFProc.eps', '-depsc');
 
 
@@ -87,15 +91,20 @@ print('figures/3x3_couplingMatrix_pFProc.eps', '-depsc');
 % plot frequency response
 
 figure('Units','inches', 'Position',[0 0 6.6 2.5],'PaperPositionMode','auto');
-[pADes, pHDes] = plotImpulseResponseMatrix((w/pi)*(fs/2), 20*log10(abs(originalMatrix_freq(:,:,1:Nfft/2))), 'xlogaxis',1, 'xlim',[20,20000],...
-    'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)', 'stemFlag',0, 'save', 1, 'plotYLabels', 0); hold on;
-[pAProcrustes, pProcrustes] = plotImpulseResponseMatrix((w/pi)*(fs/2), 20*log10(abs(couplingMatrix_freq(:,:,1:Nfft/2))), 'xlogaxis',1, 'xlim',[20,20000],...
-     'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)', 'stemFlag',0, 'save',1, 'commonYAxis', 1, 'ylim', [-80,5]); hold off;
+[pADes, pHDes] = plotImpulseResponseMatrix((w/pi)*(fs/2), ...
+    20*log10(abs(originalMatrix_freq(:,:,1:Nfft/2))), 'xlogaxis',1, 'xlim',[20,20000],...
+    'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)', 'stemFlag',0, ...
+    'save', 1, 'plotYLabels', 0); hold on;
+[pAProcrustes, pProcrustes] = plotImpulseResponseMatrix((w/pi)*(fs/2), ...
+    20*log10(abs(couplingMatrix_freq(:,:,1:Nfft/2))), 'xlogaxis',1, 'xlim',[20,20000],...
+     'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)', 'stemFlag',0, ...
+     'save',1, 'commonYAxis', 1, 'ylim', [-80,5]); hold off;
 
 
 % add legend
-Lgnd = legend(pADes(1,1), [pHDes(1,1), pProcrustes(1,1)], 'Desired', 'PF Procrustes', 'Location', 'southeast');
-print('figures/3x3_couplingMatrix_resp_compared.eps', '-depsc');
+Lgnd = legend(pADes(1,1), [pHDes(1,1), pProcrustes(1,1)], 'Desired', 'PF Procrustes', ...
+    'Location', 'southeast');
+% print('figures/3x3_couplingMatrix_resp_compared.eps', '-depsc');
 
 
 %% PRODUCES FIGURE 6B
@@ -117,7 +126,8 @@ p1 = semilogx(linspace(-fs/2,fs/2,2*degree), 20*log10(abs(S')));grid on;
 xlabel('Frequency (Hz)');
 ylabel('Singular Values (dB)');
 NameArray = {'Color', 'LineStyle'};
-ValueArray = {color_gradient(1,:,1), '-'; color_gradient(2,:,1), '--'; color_gradient(3,:,1), '-.'};
+ValueArray = {color_gradient(1,:,1), '-'; color_gradient(2,:,1), '--'; ...
+    color_gradient(3,:,1), '-.'};
 set(p1, NameArray, ValueArray);
 xlim([0,fs/2]);
 axis tight;
@@ -130,12 +140,13 @@ S = svdPerBin(fft(couplingMatrix,2*degree,3));
 p2 = semilogx(linspace(-fs/2,fs/2,2*degree), 20*log10(abs(S'))); grid on;
 xlabel('Frequency (Hz)'); ylabel('Singular Values (dB)');
 NameArray = {'Color', 'LineStyle'};
-ValueArray = {color_gradient(1,:,2), '-'; color_gradient(2,:,2), '--'; color_gradient(3,:,2), '-.'};
+ValueArray = {color_gradient(1,:,2), '-'; color_gradient(2,:,2), '--'; ...
+    color_gradient(3,:,2), '-.'};
 set(p2, NameArray, ValueArray);
 axis tight;
 xlim([0, fs/2]);
 set(gca,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-print('figures/3x3_couplingMatrix_SVD_pFProc.eps', '-depsc');
+% print('figures/3x3_couplingMatrix_SVD_pFProc.eps', '-depsc');
 
 
 %% helper functions

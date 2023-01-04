@@ -32,10 +32,11 @@ tau = sort([1023, 511, 897, 1559, 617, 987, 781, 2029, 613, 1443, 2393, 1777])';
 
 %% T60 filters for coupled rooms
 
+% DC T60
 rt60_0 = [0.8;1.5;3.5];
-
+% Nyquist T60
 rt60_pi = [0.2;0.8;1.8];
-
+% transition frequency
 wt = [1000;2000;4000]/(fs/2);
 
 
@@ -43,11 +44,8 @@ wt = [1000;2000;4000]/(fs/2);
 % Desired T60 response of nGrp rooms
 
 fig = figure('Units','inches', 'Position',[0 0 3.29 2.2],'PaperPositionMode','auto');
-% figure;
-% subplot(121);
 Nfreq = 1024;
 w = linspace(0,pi,Nfreq).';
-% w = w(1:end-1);
 [b1,a1] = shelfeq(wt(1),[rt60_0(1) rt60_pi(1)]);
 [b2,a2] = shelfeq(wt(2),[rt60_0(2) rt60_pi(2)]);
 [b3,a3] = shelfeq(wt(3),[rt60_0(3) rt60_pi(3)]);
@@ -67,7 +65,7 @@ yticks([0 0.1 0.5 1 2 3 4]);
 xlabel('Frequency (Hz)');
 xlim([20 20000]); ylim([0,4]);
 set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-print('figures/t60_rooms.eps', '-depsc');
+% print('figures/t60_rooms.eps', '-depsc');
 
 
 
@@ -85,12 +83,12 @@ for i = 1:nDel
     gamma_0 = exp(log(0.001)*(tau(i)/fs)/rt60_0(ceil(i/nSize(1))));
     gamma_pi = exp(log(0.001)*(tau(i)/fs)/rt60_pi(ceil(i/nSize(1))));
     [b(i,:),a(i,:)] = shelfeq(wt(ceil(i/nSize(1))),[gamma_0;gamma_pi]);
-    H = freqz(b(i,:),a(i,:),w);  
+    G = freqz(b(i,:),a(i,:),w);  
     if ( i == 3)
-         plt(i) = semilogx((w/pi) * (fs/2),20*log10(abs(H)), 'Color',col(ceil(i/nSize(1)),:), ...
+         plt(i) = semilogx((w/pi) * (fs/2),20*log10(abs(G)), 'Color',col(ceil(i/nSize(1)),:), ...
         'LineWidth', 1.5, 'LineStyle',ls{ceil(i/nSize(1))});
     else
-        plt(i) = semilogx((w/pi) * (fs/2),20*log10(abs(H)), 'Color',col(ceil(i/nSize(1)),:), ...
+        plt(i) = semilogx((w/pi) * (fs/2),20*log10(abs(G)), 'Color',col(ceil(i/nSize(1)),:), ...
         'LineWidth', 1.2, 'LineStyle',ls{ceil(i/nSize(1))});
     end
     grid on;hold on;
@@ -98,7 +96,8 @@ end
  
 ylabel('T60 Filter gain (dB)');
 xlabel('Frequency (Hz)');
-legend([plt(1), plt(nSize(1)+1), plt(2*nSize(1)+1)],{'Room 1','Room 2', 'Room 3'},'Location','southwest','FontSize',5);
+legend([plt(1), plt(nSize(1)+1), plt(2*nSize(1)+1)],{'Room 1','Room 2', 'Room 3'},...
+    'Location','southwest','FontSize',5);
 xlim([20 30000]);ylim([-8 0]);
 set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
 % print('figures/multiroom_t60_filters.eps', '-depsc');
@@ -116,15 +115,17 @@ h_rooms = zeros(nsamp, nGrp);
 start = 0;
 for i = 1:nGrp
 
-    [zAbsorption, feedbackMatrix, inputGain, outputGain, directGain] = convert_to_FDNTB_params(1, nSize(i), ...
+    [zAbsorption, feedbackMatrix, inputGain, outputGain, directGain] = ...
+        convert_to_FDNTB_params(1, nSize(i), ...
         b(start+1:start+nSize(i),:), a(start+1:start+nSize(i),:), ...
         theta(i), b_drive(1:nSize(i)), ones(nSize(i),1), d);
-    h_rooms(:,i) = dss2impz(nsamp, tau(start+1:start+nSize(i)).', feedbackMatrix, inputGain, outputGain, directGain,'absorptionFilters', zAbsorption);
     
-
+    h_rooms(:,i) = dss2impz(nsamp, tau(start+1:start+nSize(i)).', feedbackMatrix, ...
+        inputGain, outputGain, directGain,'absorptionFilters', zAbsorption);
+    
     start = start + nSize(i);
 
-    % save results
+%     % save results
 %     audiowrite(['audio/multiroom/r', num2str(i),'.wav'],h_rooms(:,i)./max(abs(h_rooms(:,i))),fs);
 end
 
@@ -155,8 +156,8 @@ for i = 1:nGrp
             filter_coefs(i,j,1:win_len(i,j)) =  b_diff;
             
             % needed for asymmetric coupling coefficient
-            coupling_areas(i,j) = absorp_coef(i).*area(i) + (pi*aperture(i,j)^2).*(1-absorp_coef(i));
-
+            coupling_areas(i,j) = absorp_coef(i).*area(i) + ...
+                (pi*aperture(i,j)^2).*(1-absorp_coef(i));
         end
     end
 end
@@ -187,8 +188,10 @@ for k = 1:nGrp
     T60_lims_max(:,k) = get_T60_deviation(max_dev, fs, H(:,k));
     T60_lims_min(:,k) = get_T60_deviation(min_dev, fs, H(:,k));
 
-    loglog((w/pi) * (fs/2),abs(H(:,k) - T60_lims_min(:,k)), 'LineWidth', 1.2, 'Color', col(k,:));hold on;grid on;
-    loglog((w/pi) * (fs/2),abs(T60_lims_max(:,k) - H(:,k)), 'LineWidth', 1.2, 'Color', col(k,:));hold on;grid on;
+    loglog((w/pi) * (fs/2),abs(H(:,k) - T60_lims_min(:,k)), 'LineWidth', ...
+        1.2, 'Color', col(k,:));hold on;grid on;
+    loglog((w/pi) * (fs/2),abs(T60_lims_max(:,k) - H(:,k)), 'LineWidth', ...
+        1.2, 'Color', col(k,:));hold on;grid on;
 end
 
 hold off;
@@ -198,7 +201,7 @@ xlim([20 20000]);
 set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
 % print('figures/t60_error_bounds.eps', '-depsc');
 
-%% generat impulse response
+%% generate impulse response
 
 % feedback matrix
 degree = max(max(win_len));
@@ -213,15 +216,21 @@ direct = zeros(nGrp,1);
 h_coup_freq_fdntb = dss2impz(nsamp, tau.', real(feedbackMatrix), b_drive, outputGain, direct,...
     'absorptionFilters', zAbsorption);
 
-% audiowrite('audio/multiroom/s=1_m=1_causal_fdntb.wav',h_coup_freq_fdntb(:,1)./max(abs(h_coup_freq_fdntb(:,1))),fs);
-% audiowrite('audio/multiroom/s=1_m=2_causal_fdntb.wav',h_coup_freq_fdntb(:,2)./max(abs(h_coup_freq_fdntb(:,2))),fs);
-% audiowrite('audio/multiroom/s=1_m=3_causal_fdntb.wav',h_coup_freq_fdntb(:,3)./max(abs(h_coup_freq_fdntb(:,3))),fs);
+%% save impulse responses
+
+% audiowrite('audio/multiroom/s=1_m=1_causal_fdntb.wav',...
+%             h_coup_freq_fdntb(:,1)./max(abs(h_coup_freq_fdntb(:,1))),fs);
+% audiowrite('audio/multiroom/s=1_m=2_causal_fdntb.wav',...
+%             h_coup_freq_fdntb(:,2)./max(abs(h_coup_freq_fdntb(:,2))),fs);
+% audiowrite('audio/multiroom/s=1_m=3_causal_fdntb.wav',...
+%             h_coup_freq_fdntb(:,3)./max(abs(h_coup_freq_fdntb(:,3))),fs);
 
 
 %% PRODUCES FIGURE 8C
 % plot spectrograms
 
-ftgram2N4S([h_rooms, h_coup_freq_fdntb(:,3)./max(abs(h_coup_freq_fdntb(:,3)))], fs, 'figures/multiroom_spec_causal', true);
+ftgram2N4S([h_rooms, h_coup_freq_fdntb(:,3)./max(abs(h_coup_freq_fdntb(:,3)))], ...
+    fs, 'figures/multiroom_spec_causal', true);
 
 %% helper functions
 
