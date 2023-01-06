@@ -1,4 +1,4 @@
-function [plotAxes, plotHandles] = plotImpulseResponseMatrix( t, ir, varargin )
+function [plotAxes, plotHandles] = plotImpulseResponseMatrixStem( t, ir, varargin )
 %plotImpulseResponseMatrix - Plot matrix of impulse response / polynomial matrix in subplots
 %
 % Syntax:  [plotAxes, plotHandles] = plotImpulseResponseMatrix( t, ir, varargin )

@@ -1,7 +1,7 @@
 %% GFDN with two coupled rooms and filter feedback matrix
 %PRODUCES FIGURE 4 AND 5 IN PAPER
 
-close all; 
+close all; clc;
 addpath('utils/.');
 addpath('plot/.');
 addpath(genpath('fdnToolbox/.'));
@@ -259,8 +259,8 @@ for i = 1:length(aperture)
             
             
             %% plot 2 stage decay with and without FFM
-            fig;
-            subplot(1,2,j)
+            figure(j+101);
+%             subplot(1,2,j)
             %if turning point is negative, single slope decay is observed
             if tp_x < 0
                 hfig = plot(t_env, ([mag2db(ir_env) mag2db(ir_fit) ...
@@ -309,15 +309,18 @@ if plot_ir
 elseif plot_2_stage
     % two stage decay
 
-    ttl = {'Scalar feedback matrix', 'Filter feedback matrix'};
+%     ttl = {'Scalar feedback matrix', 'Filter feedback matrix'};
     for j = 1:2
-        subplot(1,2,j);
+%         subplot(1,2,j);
+        figure(j+101)
+        set(gcf,'Units','inches', 'Position',[0 0 2.29 4.5],'PaperPositionMode','auto');
         hold off;
-        ylim([-120, 180]);xlim([-0 2]);
+        ylim([-120, 180]);xlim([-0 2]); 
         xlabel('Time (s)');
         ylabel('Magnitude (dB)');
-        title(ttl{j});
+%         title(ttl{j});
         set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+        saveas(gcf,['figures/coupled_2_stage_decay_',num2str(j),des,'.png']);
     end
 %     print(['figures/coupled_2_stage_decay_',des,'.eps'], '-depsc');
 
