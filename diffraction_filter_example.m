@@ -13,28 +13,12 @@ Fs = 44100;    %sampling rate
 ntheta = 50;
 theta = linspace(0, pi/2 - 0.001, ntheta);
 
-
-% arg = aperture(i)/pi * (k'*sin(theta));
-% tau = sigma * ((sinc(arg).^2)./(ones(nfreq,1) * cos(theta)));
-% maxTau = max(tau(:,end));
-% 
-% figure;
-% colormap(jet);
-% [x,y] = meshgrid(theta, freqs);
-% h = surf(x,y,tau);
-% set(h, 'LineStyle', 'none');
-% zlabel('Transmission coefficient, \tau');
-% xlabel('Incidence angle, \theta');
-% ylabel('Frequency in Hz');
-
-
 %% loop over different aperture sizes
 
 fig = figure('Units','inches', 'Position',[0 0 3.3 4.5],'PaperPositionMode','auto');
-% fig = figure(1);
 col = get(gca,'colororder');
 NameArray = {'LineStyle'};
-ValueArray = {'-';'--'};
+ValueArray = {'-';'-.'};
 lgdstr = {};
 leglines = [];
 
@@ -90,14 +74,8 @@ for i = 1:length(aperture)
     
     %% PRODUCES FIGURE 3
     fig;
+    
     ax1 = subplot(211);
-    h1 = semilogx(freqs, 20*log10(abs(tau_avg)), 'LineStyle','-');grid on;hold on;
-    h2 = semilogx(freqs, 20*log10(abs(H_pm)), 'LineStyle','-');grid on;hold on;
-    set([h1,h2], 'Color', col(i,:), NameArray, ValueArray);
-    xlabel('Frequency (Hz)');xlim([20, Fs/2]);
-    ylabel('$\zeta_{avg}(f)$ magnitude (dB)', 'Interpreter','latex');
-   
-    ax2 = subplot(212);
     time_aligned_tau = tau_filt(nfreq-(win_len-1)/2 : nfreq+(win_len-1)/2); 
     h = plot([time_aligned_tau.', tau_pm.'], 'Color', col(i,:));grid on; hold on;
     axis tight;
@@ -106,11 +84,24 @@ for i = 1:length(aperture)
     leglines = [leglines, h(1)];
     set(h, NameArray, ValueArray);
     
+    ax2 = subplot(212);
+    h1 = semilogx(freqs, 20*log10(abs(tau_avg)), 'LineStyle','-');grid on;hold on;
+    h2 = semilogx(freqs, 20*log10(abs(H_pm)), 'LineStyle','-');grid on;hold on;
+    set([h1,h2], 'Color', col(i,:), NameArray, ValueArray);
+    xlabel('Frequency (Hz)');xlim([20, Fs/2]);
+    ylabel('$\zeta_{avg}(f)$ magnitude (dB)', 'Interpreter','latex');
+   
 end
 
 fig;hold off;
-set([ax1,ax2],'FontUnits','points', 'FontWeight','normal', 'FontSize', 8, 'FontName','Times');
-legend(leglines,lgdstr);
+set([ax2,ax1],'FontUnits','points', 'FontWeight','normal', 'FontSize', 8, 'FontName','Times');
+
+Lgnd = legend(leglines,lgdstr);
+Lgnd.NumColumns = ceil(length(lgdstr)/2);
+Lgnd.Position(1) = 0.03;
+Lgnd.Position(2) = 0.93;
+
+saveas(gcf,'./figures/diffraction_filter.png')
 % print('figures/diffraction_filter.eps', '-depsc');
 
 
