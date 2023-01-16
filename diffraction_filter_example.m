@@ -101,8 +101,9 @@ Lgnd.NumColumns = ceil(length(lgdstr)/2);
 Lgnd.Position(1) = 0.03;
 Lgnd.Position(2) = 0.93;
 
-saveas(gcf,'./figures/diffraction_filter.png')
-% print('figures/diffraction_filter.eps', '-depsc');
+% saveas(gcf,'./figures/diffraction_filter.png')
+exportgraphics(gcf, './figures/diffraction_filter.png', 'Resolution', 300);
+% print('./figures/diffraction_filter.eps', '-depsc');
 
 
 

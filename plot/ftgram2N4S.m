@@ -5,7 +5,7 @@ function [] = ftgram2N4S( x, fs, figtitle, saveflag )
 tempfig = figure;
 [~, ax] = ftgram(x, fs, 'rir',  'waveform', false, 'dbrange', 60, 'tanhflag', false, 'ms', false, 'trim', false, 'logt', false, 'nbins', 1024, 'nskip', 16);
 
-fig = figure('Units','inches', 'Position',[0 0 3.29 2.9],'PaperPositionMode','auto');
+fig = figure('Units','inches', 'Position',[0 0 3.29 3.5],'PaperPositionMode','auto');
     set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
 
 nax(1) = subplot(4,1,1);

@@ -3,7 +3,7 @@
 
 close all; clc;
 addpath('utils/.');
-addpath('plot/.');
+addpath(genpath('plot/.'));
 addpath(genpath('fdnToolbox/.'));
 
 
@@ -143,7 +143,8 @@ plot_2_stage = 1;
 
 %% PRODUCES FIGURE 4
 % plot coupling matrix response
-plot_diffraction_matrix_response(2,fs,c,aperture,'areas',area,'absorption_coeffs', absorp_coef);
+plot_diffraction_matrix_response(2,fs,c,aperture,'areas',area,'absorption_coeffs',...
+    absorp_coef, 'save_flag', 1);
 
 if plot_ir
 
@@ -320,9 +321,10 @@ elseif plot_2_stage
         ylabel('Magnitude (dB)');
 %         title(ttl{j});
         set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-        saveas(gcf,['figures/coupled_2_stage_decay_',num2str(j),des,'.png']);
+%         saveas(gcf,['figures/coupled_2_stage_decay_',num2str(j),des,'.png']);
+        print(['figures/coupled_2_stage_decay_',num2str(j),des,'.eps'], '-depsc');
     end
-%     print(['figures/coupled_2_stage_decay_',des,'.eps'], '-depsc');
+   
 
 
 end

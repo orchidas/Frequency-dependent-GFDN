@@ -11,15 +11,17 @@ function [plotAxes,plotHandles] = plot_diffraction_matrix_response(nRooms,fs,c,a
 % OUTPUTS:
 % plotAxes, plotHandles - axes and handles of plot
     
-
+addpath(genpath('plot/.'));
 p = inputParser;
 p.KeepUnmatched = true;
 addParameter(p, 'areas', ones(length(aperture),1));
 addParameter(p, 'absorption_coeffs', []);
+addParameter(p, 'save_flag', 0);
 
 parse(p,varargin{:});
 area = p.Results.areas;
 absorp_coef = p.Results.absorption_coeffs;
+save_flag = p.Results.save_flag;
 
 nbins = 2^10;
 w = pi*((0:nbins-1).'/nbins);
@@ -42,19 +44,23 @@ for k = 1:length(aperture)
      couplingMatrixTD = two_room_coupling_matrix(aperture(k), b_diff, absorbing_area, 'asymmetry', 0);
      couplingMatrixFD = fft(couplingMatrixTD, nbins*2, 3);
      
-%      if k < length(aperture)
-        [plotAxes, plotHandles] = plotImpulseResponseMatrix((w/pi)*(fs/2), 20*log10(abs(couplingMatrixFD(:,:,1:nbins))), 'xlim',[20,20000],...
-        'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)', 'Color', colors(k,:), 'ylim', [-50,5]); grid on;
-%      else
-%           [plotAxes, plotHandles] = plotImpulseResponseMatrix((w/pi)*(fs/2), 20*log10(abs(couplingMatrixFD(:,:,1:nbins))), 'xlim',[20,20000],...
-%      'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)', 'Color', colors(k,:), 'ylim', [-50,5]); grid on;
-%      end
+     if k < length(aperture)
+        [plotAxes, plotHandles] = plotImpulseResponseMatrixStem((w/pi)*(fs/2), ...
+            20*log10(abs(couplingMatrixFD(:,:,1:nbins))),...
+            'xlogaxis',1, 'xlim',[20,20000],'xlabel', 'Frequency (Hz)', ...
+            'ylabel', 'Magnitude (dB)', 'stemFlag', 0, 'colors', colors(k,:) ...
+            ,'save', save_flag, 'ylim', [-50,5], 'plotYLabels', 0); grid on;
+     else
+       [plotAxes, plotHandles] = plotImpulseResponseMatrixStem((w/pi)*(fs/2), ...
+           20*log10(abs(couplingMatrixFD(:,:,1:nbins))), 'xlogaxis',1, 'xlim',[20,20000],...
+           'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)', 'stemFlag', 0, ...
+           'colors', colors(k,:) ,'save', save_flag, 'ylim', [-50,5], 'plotYLabels', 1); grid on;
+     end
    
      lgdstr{k} = ['a = ', num2str(round(aperture(k),3)), ' m'];
 %      drawnow; hold on;
 end
 set(plotAxes,'XScale','log');
-
 
 
 % add legend
@@ -65,8 +71,10 @@ Lgnd = legend(plotAxes(1),lgdstr);
 Lgnd.NumColumns = ceil(length(lgdstr)/2);
 Lgnd.Position(1:2) = [0.13 0.48];
 
-% print('figures/coupled_FDN_couplingMatrix.eps', '-depsc');
- 
-saveas(gcf,'figures/coupled_FDN_couplingMatrix.png')
+if save_flag
+%     exportgraphics(gcf, './figures/coupled_FDN_couplingMatrix.png', 'Resolution', 300);
+    saveas(gcf,'figures/coupled_FDN_couplingMatrix.png');
+%     print('figures/coupled_FDN_couplingMatrix.eps', '-depsc');
+end
 
 end
