@@ -69,43 +69,47 @@ originalMatrix_freq = fft(originalMatrix, Nfft, 3);
 
 %% PRODUCES FIGURE 6A
 % plot time domain filters
-figure('Units','inches', 'Position',[0 0 4 3],'PaperPositionMode','auto'); hold on;
-[plotAxes, pHDes, commonAx] = plotImpulseResponseMatrix(0:(degree-1), originalMatrix, ...
+figure('Units','inches', 'Position',[0 0 3.25 2.5],'PaperPositionMode','auto'); hold on;
+[plotAxes, pHDes] = plotImpulseResponseMatrix(0:(degree-1), originalMatrix, ...
     'Color', [0, 0.4470, 0.7410],'ylim', [-0.01,0.01], ...
     'xlabel', 'Time (Samples)', 'ylabel', 'Amplitude'); 
-commonAx.YLabel.Position(1) = -0.1;
-set(plotAxes,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-set(commonAx,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-exportgraphics(gcf, 'figures/3x3_couplingMatrix_init.png', 'Resolution', 300)
+% commonAx.YLabel.Position(1) = -0.1;
+% set(plotAxes,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+% set(commonAx,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+exportgraphics(gcf, 'figures/3x3_couplingMatrix_init.pdf','BackgroundColor','none','ContentType','vector')
 
-figure('Units','inches', 'Position',[0 0 4 3],'PaperPositionMode','auto'); hold on;
-[plotAxes, perFreqProcrustes, commonAx] = plotImpulseResponseMatrix(0:(degree-1), couplingMatrix, ...
+
+figure('Units','inches', 'Position',[0 0 3.25 2.5],'PaperPositionMode','auto'); hold on;
+[plotAxes, perFreqProcrustes] = plotImpulseResponseMatrix(0:(degree-1), couplingMatrix, ...
     'Color', [0.8500, 0.3250, 0.0980], 'ylim', [-0.01,0.01] , ...
     'xlabel', 'Time (Samples)', 'ylabel', 'Amplitude');
-commonAx.YLabel.Position(1) = -0.1;
-set(plotAxes,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-set(commonAx,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-exportgraphics(gcf, 'figures/3x3_couplingMatrix_pFProc.png', 'Resolution', 300)
+% commonAx.YLabel.Position(1) = -0.1;
+% set(plotAxes,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+% set(commonAx,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+exportgraphics(gcf, 'figures/3x3_couplingMatrix_pFProc.pdf','BackgroundColor','none','ContentType','vector')
+
 
 %% PRODUCES FIGURE 7
 % plot frequency response
 
-figure('Units','inches', 'Position',[0 0 4 2.5],'PaperPositionMode','auto'); hold on;
+figure('Units','inches', 'Position',[0 0 3.25 2.5],'PaperPositionMode','auto'); hold on;
 [pADes, pHDes] = plotImpulseResponseMatrix((w/pi)*(fs/2), ...
     mag2db(abs(originalMatrix_freq(:,:,1:Nfft/2))), ...
     'xlim',[200,20000],'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)');
-[pAProcrustes, pProcrustes,commonAx] = plotImpulseResponseMatrix((w/pi)*(fs/2), ...
+[pAProcrustes, pProcrustes] = plotImpulseResponseMatrix((w/pi)*(fs/2), ...
     mag2db(abs(couplingMatrix_freq(:,:,1:Nfft/2))), ...
     'xlim',[200,20000],'xlabel', 'Frequency (Hz)', 'ylabel', 'Magnitude (dB)','ylim', [-80,5]);
-set(pAProcrustes,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-set(commonAx,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+% set(pAProcrustes,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+% set(commonAx,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
 set(pADes,'XScale','log');
+set(pADes,'XTick',[1000 10000]);
 
 % add legend
 Lgnd = legend(pADes(1,1), [pHDes(1,1), pProcrustes(1,1)], 'Desired', 'PF Procrustes');
 Lgnd.NumColumns = 2;
-Lgnd.Position(1:2) = [0.33 0.94];
-exportgraphics(gcf, 'figures/3x3_couplingMatrix_resp_compared.png', 'Resolution', 300)
+Lgnd.Position(1:2) = [0.23 0.93];
+exportgraphics(gcf, 'figures/3x3_couplingMatrix_resp_compared.pdf','BackgroundColor','none','ContentType','vector')
+
 
 
 %% PRODUCES FIGURE 6B
@@ -132,8 +136,8 @@ ValueArray = {color_gradient(1,:,1), '-'; color_gradient(2,:,1), '--'; ...
 set(p1, NameArray, ValueArray);
 xlim([0,fs/2]);
 axis tight;
-set(gca,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-exportgraphics(gcf, 'figures/3x3_couplingMatrix_SVD_init.png', 'Resolution', 300)
+% set(gca,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+exportgraphics(gcf, 'figures/3x3_couplingMatrix_SVD_init.pdf','BackgroundColor','none','ContentType','vector')
 
 figure('Units','inches', 'Position',[0 0 4 2],'PaperPositionMode','auto'); grid on;
 S = svdPerBin(fft(couplingMatrix,2*degree,3));
@@ -145,8 +149,9 @@ ValueArray = {color_gradient(1,:,2), '-'; color_gradient(2,:,2), '--'; ...
 set(p2, NameArray, ValueArray);
 axis tight;
 xlim([0, fs/2]);
-set(gca,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-exportgraphics(gcf, 'figures/3x3_couplingMatrix_SVD_pFProc.png', 'Resolution', 300)
+% set(gca,'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+exportgraphics(gcf, 'figures/3x3_couplingMatrix_SVD_pFProc.pdf','BackgroundColor','none','ContentType','vector')
+
 
 
 %% helper functions

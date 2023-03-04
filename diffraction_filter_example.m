@@ -15,7 +15,8 @@ theta = linspace(0, pi/2 - 0.001, ntheta);
 
 %% loop over different aperture sizes
 
-fig = figure('Units','inches', 'Position',[0 0 3.3 4.5],'PaperPositionMode','auto');
+fig1 = figure('Units','inches', 'Position',[0 0 3.3 2.4],'PaperPositionMode','auto'); grid on; hold on;
+fig2 = figure('Units','inches', 'Position',[0 0 3.3 2.0],'PaperPositionMode','auto');
 col = get(gca,'colororder');
 NameArray = {'LineStyle'};
 ValueArray = {'-';'-.'};
@@ -40,7 +41,6 @@ for i = 1:length(aperture)
 
 
     %% numerically integrate over theta to get average energy arriving at aperture
-    
     
     sigma = pi * aperture(i)^2;  %assuming circular aperture
     fun = @(angle) sigma * (sinc((k * aperture(i))/pi * sin(angle)).^2).*sin(angle);
@@ -73,18 +73,17 @@ for i = 1:length(aperture)
     [H,w] = freqz(b,a,nfreq);
     
     %% PRODUCES FIGURE 3
-    fig;
+    set(0, 'currentfigure', fig1);
     
-    ax1 = subplot(211);
     time_aligned_tau = tau_filt(nfreq-(win_len-1)/2 : nfreq+(win_len-1)/2); 
-    h = plot([time_aligned_tau.', tau_pm.'], 'Color', col(i,:));grid on; hold on;
+    h = plot([time_aligned_tau.', tau_pm.'], 'Color', col(i,:)); 
     axis tight;
-    xlabel('Number of samples, n'); ylabel('$\zeta_{avg}(n)$ amplitude', 'Interpreter','latex');
+    xlabel('Time (samples)'); ylabel('$\zeta_{avg}(n)$ amplitude', 'Interpreter','latex');
     lgdstr{i} =  ['a = ', num2str(round(aperture(i),3)),' m'];
     leglines = [leglines, h(1)];
     set(h, NameArray, ValueArray);
     
-    ax2 = subplot(212);
+    set(0, 'currentfigure', fig2);
     h1 = semilogx(freqs, 20*log10(abs(tau_avg)), 'LineStyle','-');grid on;hold on;
     h2 = semilogx(freqs, 20*log10(abs(H_pm)), 'LineStyle','-');grid on;hold on;
     set([h1,h2], 'Color', col(i,:), NameArray, ValueArray);
@@ -93,17 +92,21 @@ for i = 1:length(aperture)
    
 end
 
-fig;hold off;
-set([ax2,ax1],'FontUnits','points', 'FontWeight','normal', 'FontSize', 8, 'FontName','Times');
+set(0, 'currentfigure', fig1); hold off;
+% fig;hold off;
+% set([ax2,ax1],'FontUnits','points', 'FontWeight','normal', 'FontSize', 8, 'FontName','Times');
+set(gca,'Position',[0.1300 0.1100 0.7750 0.7350])
 
-Lgnd = legend(leglines,lgdstr);
+Lgnd = legend(leglines,lgdstr,'Location','north');
 Lgnd.NumColumns = ceil(length(lgdstr)/2);
 Lgnd.Position(1) = 0.03;
-Lgnd.Position(2) = 0.93;
+Lgnd.Position(2) = 0.88;
 
 % saveas(gcf,'./figures/diffraction_filter.png')
-exportgraphics(gcf, './figures/diffraction_filter.png', 'Resolution', 300);
+% exportgraphics(gcf, './figures/diffraction_filter.png', 'Resolution', 300);
+exportgraphics(gcf, './figures/diffraction_filter1.pdf','BackgroundColor','none','ContentType','vector');
 % print('./figures/diffraction_filter.eps', '-depsc');
 
-
+set(0, 'currentfigure', fig2); hold off;
+exportgraphics(gcf, './figures/diffraction_filter2.pdf','BackgroundColor','none','ContentType','vector');
 

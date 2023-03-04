@@ -35,7 +35,7 @@ colors =  [[0    0.4470    0.7410];
         [0.3010    0.7450    0.9330];
         [0.6350    0.0780    0.1840]];
 
-figure('Units','inches', 'Position',[0 0 4.5 4.5],'PaperPositionMode','auto');
+figure('Units','inches', 'Position',[0 0 3.25 3.3],'PaperPositionMode','auto');
 
 for k = 1:length(aperture)
      [b_diff, ~, win_len] = design_diffraction_filter(aperture(k),fs,c,'exact');
@@ -69,12 +69,13 @@ set(plotAxes,'XScale','log');
 
 Lgnd = legend(plotAxes(1),lgdstr);
 Lgnd.NumColumns = ceil(length(lgdstr)/2);
-Lgnd.Position(1:2) = [0.13 0.48];
+Lgnd.Position(1:2) = [0.10 0.48];
 
 if save_flag
 %     exportgraphics(gcf, './figures/coupled_FDN_couplingMatrix.png', 'Resolution', 300);
-    saveas(gcf,'figures/coupled_FDN_couplingMatrix.png');
+%     saveas(gcf,'figures/coupled_FDN_couplingMatrix.png');
 %     print('figures/coupled_FDN_couplingMatrix.eps', '-depsc');
+    exportgraphics(gcf,'./figures/coupled_FDN_couplingMatrix.pdf','BackgroundColor','none','ContentType','vector')
 end
 
 end

@@ -10,7 +10,7 @@ nbins = 1024;
 w = linspace(0,pi,nbins);
 fs = 44100;
 alpha = ones(N, N, order);
-beta =(0:0.1:1) * pi/2;
+beta =(0:1:1) * pi/2;
 
 phi_selection = [2 5];
 
@@ -52,18 +52,18 @@ for i = phi_selection %1:length(phi)
 
         %sign matrix, alpha, whose modulus is 1
         alpha(:,:,order+1) = exp(1j*beta(m));
-        
+
         % P_1  + alpha P_2 z - i hav checked, this does the right thing
         filter_coeff(:,:,:,i,m) = P.* alpha;
-        
+
         % always true
-%         isParaunitary(filter_coeff(:,:,:,i,m))
-        
+        %         isParaunitary(filter_coeff(:,:,:,i,m))
+
     end
 end
 
 %% setup figures
-fig = figure('Units','inches', 'Position',[0 0 6.58 6.2],'PaperPositionMode','auto');
+fig = figure('Units','inches', 'Position',[0 0 3.25 3.3],'PaperPositionMode','auto');
 for j = 1:N
     for k = 1:N
         b = sub2ind([N,N],j,k);
@@ -74,7 +74,7 @@ for j = 1:N
 end
 
 for i = phi_selection %1:length(phi)
-    lgdstr{i} = sprintf('$\\bar{\\phi} = %2.2f$', round(phi(i)/(pi/4),3));
+    lgdstr{i} = sprintf('$\\phi = %2.2f$', round(phi(i)/(pi/4),3));
 end
 
 %% plot filter coefficients
@@ -83,11 +83,11 @@ for j = 1:N
         for i = 1:length(phi)
             for m = 1:length(beta)
 
-            b = squeeze(filter_coeff(j,k,:,i,m));
+                b = squeeze(filter_coeff(j,k,:,i,m));
 
-            plot_handle(j,k,i,m) = plot(ax(j,k),real(b),imag(b),'.',...
-                'Color', color_gradient(m,:,i),...
-                'MarkerSize', 5);
+                plot_handle(j,k,i,m) = plot(ax(j,k),real(b),imag(b),'.',...
+                    'Color', color_gradient(m,:,i),...
+                    'MarkerSize', 5);
             end
         end
     end
@@ -102,46 +102,41 @@ saveas(gcf,'./figures/filter_coefficients_2x2.png')
 
 
 %% setup figures
-fig = figure('Units','inches', 'Position',[0 0 6.58 6.2],'PaperPositionMode','auto');
-for j = 1:N
-    for k = 1:N
-        b = sub2ind([N,N],j,k);
-        ax(j,k) = subplot(N,N,b); hold on; grid on;
-        set(gca, 'XScale', 'log');
-        xlim([200, fs/2]); ylim([-60, 10]);
-        xlabel('Frequency (Hz)'); ylabel('Magnitude (dB)');
-    end
-end
+fig = figure('Units','inches', 'Position',[0 0 3.25 3.3]*1.1,'PaperPositionMode','auto');
 
 %% plot magnitude response
+f = w / pi * fs/2;
+
 for j = 1:N
     for k = 1:N
         for i = phi_selection %1:length(phi)
             for m = 1:length(beta)
-
-
-            b = squeeze(filter_coeff(j,k,:,i,m));
-            
-            H = freqz(b, 1, w);
-            
-            f = w / pi * fs/2;
-             
-            plot_handle(j,k,i,m) = plot(ax(j,k),f,mag2db(abs(H)),'-',...
-                'Color', color_gradient(m,:,i),...
-                'MarkerSize', 5);
+                b = squeeze(filter_coeff(j,k,:,i,m));
+                H(j,k,:,i,m) = freqz(b, 1, w);
             end
         end
     end
 end
 
+for i = phi_selection %1:length(phi)
+    for m = 1:length(beta)
+        [plotAxes,plot_handle(:,:,i,m)] = plotImpulseResponseMatrix(f,mag2db(abs(H(:,:,:,i,m))),...
+            'Color', color_gradient(m,:,i),...
+            'MarkerSize', 5, ...
+            'xlabel','Frequency (Hz)','ylabel','Magnitude (dB)',...
+            'xlim',[200, fs/2],'ylim',[-60, 10]);
+    end
+end
+set(plotAxes,'XScale','log');
+set(plotAxes,'xtick',[100 1000 10000]);
+
 %% legend
 Lgnd = legend(squeeze(plot_handle(1,1,phi_selection,1)),lgdstr{phi_selection},'Interpreter','latex');
 Lgnd.NumColumns = length(phi);
-Lgnd.Position(1) = 0.4;
+Lgnd.Position(1) = 0.25;
 Lgnd.Position(2) = 0.95;
 
-saveas(gcf,'./figures/filter_magnitude_respose_2x2.png')
-
+exportgraphics(gcf,'./figures/filter_magnitude_respose_2x2.pdf','BackgroundColor','none','ContentType','vector')
 
 %% returns closed form magnitude response for particular values of phi and beta
 function [H_exp] = closed_form_magnitude_response(phi, beta, w, i, j)
