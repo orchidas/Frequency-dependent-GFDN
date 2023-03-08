@@ -52,7 +52,7 @@ function [b_diff, a_diff , win_len, tau_avg] = design_diffraction_filter(apertur
 
         if strcmp(des_type,'pm')
             %use parks mcClellan to design FIR filter    
-            b_diff = firpm(win_len-1, freqs/(Fs/2), tau_avg).'; 
+            b_diff = firpm(win_len - 1, freqs/(Fs/2), tau_avg).'; 
             win_len = length(b_diff);
             a_diff = 1;
         else

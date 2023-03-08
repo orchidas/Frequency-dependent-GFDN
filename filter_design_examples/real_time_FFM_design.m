@@ -53,11 +53,11 @@ for i = phi_selection %1:length(phi)
         %sign matrix, alpha, whose modulus is 1
         alpha(:,:,order+1) = exp(1j*beta(m));
 
-        % P_1  + alpha P_2 z - i hav checked, this does the right thing
+        % P_1  + alpha P_2 z - i have checked, this does the right thing
         filter_coeff(:,:,:,i,m) = P.* alpha;
 
         % always true
-        %         isParaunitary(filter_coeff(:,:,:,i,m))
+        % isParaunitary(filter_coeff(:,:,:,i,m))
 
     end
 end
@@ -98,7 +98,7 @@ Lgnd.NumColumns = length(phi);
 Lgnd.Position(1) = 0.4;
 Lgnd.Position(2) = 0.95;
 
-saveas(gcf,'./figures/filter_coefficients_2x2.png')
+saveas(gcf,'../figures/filter_coefficients_2x2.png')
 
 
 %% setup figures
@@ -136,7 +136,7 @@ Lgnd.NumColumns = length(phi);
 Lgnd.Position(1) = 0.25;
 Lgnd.Position(2) = 0.95;
 
-exportgraphics(gcf,'./figures/filter_magnitude_respose_2x2.pdf','BackgroundColor','none','ContentType','vector')
+exportgraphics(gcf,'../figures/filter_magnitude_respose_2x2.pdf','BackgroundColor','none','ContentType','vector')
 
 %% returns closed form magnitude response for particular values of phi and beta
 function [H_exp] = closed_form_magnitude_response(phi, beta, w, i, j)

@@ -13,32 +13,16 @@ room_dims = [[3,1.8,2]; [4,3.2,3.8]; [6,5.5,4.5]];
 rt60_0 = [0.8;1.5;3.5];
 rt60_pi = [0.2;0.8;1.8];
 [absorp_coef, area]  = calculate_absorption_coefficient(Nrooms, room_dims, rt60_0);
-coupling_areas = ones(Nrooms, Nrooms);
 
 fs = 44100;
 c = 343;    %speed of sound in m/s
-type = 'diffract';  %mixing matrix type
-des = 'pm';  %design criteria for diffraction filter
-filter_coefs = zeros(Nrooms,Nrooms,300);
-win_len = zeros(Nrooms,Nrooms);
+des = 'exact';  %design criteria for diffraction filter
 Nfft = 1024;
 w = linspace(0, pi, Nfft/2);
 
-%% Compute initial diffraction filter
-for i = 1:Nrooms
-    for j = 1:Nrooms
-        coupling_areas(i,j) = absorp_coef(i).*area(i) + (pi*aperture(i,j)^2).*(1-absorp_coef(i));
+%% get desired PU coupling matrix
 
-        if (i ~= j)
-            [b_diff, a_diff, win_len(i,j)] = design_diffraction_filter(aperture(i,j),fs,c,des);
-            filter_coefs(i,j,1:win_len(i,j)) =  b_diff;
-        end
-    end
-end
-
-%% find closest PU matrix with per frequency Procrustes
-
-[couplingMatrix, originalMatrix, degree] = multiroom_coupling_matrix(Nrooms, filter_coefs, aperture, coupling_areas);
+[couplingMatrix, originalMatrix, degree] = multiroom_coupling_matrix(fs, c, Nrooms, aperture, absorp_coef, area, des);
 couplingMatrix_freq = fft(couplingMatrix, Nfft,3);
 originalMatrix_freq = fft(originalMatrix, Nfft, 3);
 
