@@ -48,7 +48,7 @@ fig = figure('Units','inches', 'Position',[0 0 3.29 2.2],'PaperPositionMode','au
 [b3,a3] = shelfeq(wt(3),[rt60_0(3) rt60_pi(3)]);
 
 plot_desired_T60(fs, nGrp, [b1; b2; b3], [a1; a2; a3], fig);
-% print('../figures/t60_rooms.eps', '-depsc');
+% exportgraphics(gcf, '../figures/t60_rooms.pdf','BackgroundColor','none','ContentType','vector');
 
 %% FDN attenuation filters
 
@@ -67,7 +67,7 @@ for i = 1:nDel
 end
  
 plot_fdn_attenuation_filters(nDel, nSize, fs, b, a, col, ls);
-% print('../figures/multiroom_t60_filters.eps', '-depsc');
+% exportgraphics(gcf, '../figures/multiroom_t60_filters.pdf','BackgroundColor','none','ContentType','vector');
 
 %% individual room mixing matrices and IR
 
@@ -125,7 +125,7 @@ M_block = get_block_mixing_matrix(nSize, nGrp, theta);
 
 fig = figure('Units','inches', 'Position',[0 0 3.29 2.2],'PaperPositionMode','auto');
 plot_T60_deviation(fs, couplingMatrix, tau, [b1; b2; b3], [a1; a2; a3], col, fig); 
-% print('../figures/t60_error_bounds.eps', '-depsc');
+exportgraphics(gcf, '../figures/t60_error_bounds.pdf','BackgroundColor','none','ContentType','vector');
 
 %% generate impulse response
 
@@ -137,7 +137,7 @@ for k = 1:degree
 end
 
 % find impulse response
-outputGain = blkdiag(ones(1,4), ones(1,4), ones(1,4));
+outputGain = blkdiag(ones(1,nSize(1)), ones(1,nSize(1)), ones(1,nSize(1)));
 direct = zeros(nGrp,1);
 h_coup_freq_fdntb = dss2impz(nsamp, tau.', real(feedbackMatrix), b_drive, outputGain, direct,...
     'absorptionFilters', zAbsorption);

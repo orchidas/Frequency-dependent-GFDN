@@ -30,17 +30,23 @@ for k = 1:nGrp
     H(:,k) = freqz(b(k,:), a(k,:), w);
     T60_lims_max(:,k) = get_T60_deviation(max_dev, fs, H(:,k));
     T60_lims_min(:,k) = get_T60_deviation(min_dev, fs, H(:,k));
-
-    loglog((w/pi) * (fs/2),abs(H(:,k) - T60_lims_min(:,k)), 'LineWidth', ...
-        1.2, 'Color', col(k,:));hold on;grid on;
-    loglog((w/pi) * (fs/2),abs(T60_lims_max(:,k) - H(:,k)), 'LineWidth', ...
-        1.2, 'Color', col(k,:));hold on;grid on;
+    
+    jnd_t60  =  0.05 * abs(H(:,k)) * [1 , -1];
+    
+    gL = loglog((w/pi) * (fs/2),abs(H(:,k) - T60_lims_min(:,k)), 'LineWidth', ...
+        1.0, 'Color', col(k,:));hold on;grid on;
+%     gL = loglog((w/pi) * (fs/2),abs(T60_lims_max(:,k) - H(:,k)), 'LineWidth', ...
+%         1.0, 'Color', col(k,:));hold on;grid on;
+    hL = loglog((w/pi) * (fs/2), jnd_t60, 'LineWidth', ...
+        1.2, 'Color', col(k,:), 'LineStyle', '-.');hold on;grid on; 
+    
 end
 
 hold off;
 ylabel('T60 error (s)');
 xlabel('Frequency (Hz)');
-xlim([20 20000]);
+xlim([20 20000]); ylim([1e-4, 2]);
+legend([hL(1), gL],'JND', 'max T60 dev');
 set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
 
 
