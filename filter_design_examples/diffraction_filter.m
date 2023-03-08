@@ -38,7 +38,7 @@ for i = 1:length(aperture)
     k = 2*pi*freqs/c;   %wave number
 
 
-    %% numerically integrate over theta to get average energy arriving at aperture
+    %% get filter coefficients
     
     % use Parks mcClellan to design FIR filter
     tau_pm = design_diffraction_filter(aperture(i), Fs, c, 'pm');
@@ -46,8 +46,7 @@ for i = 1:length(aperture)
 
     % inverse FFT from integral - this is what filter should be
     [tau_filt, a, len, tau_avg] = design_diffraction_filter(aperture(i), Fs, c, 'exact');
-%     %area of tau_filt remains same, regardless of aperture size
-%     area = 0.5 * win_len * tau_filt(nfreq);
+
 
     
     %% PRODUCES FIGURE 3
