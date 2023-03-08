@@ -63,7 +63,6 @@ for i = 1:nDel
     gamma_0 = exp(log(0.001)*(tau(i)/fs)/rt60_0(ceil(i/nSize(1))));
     gamma_pi = exp(log(0.001)*(tau(i)/fs)/rt60_pi(ceil(i/nSize(1))));
     [b(i,:),a(i,:)] = shelfeq(wt(ceil(i/nSize(1))),[gamma_0;gamma_pi]);
-    
 end
  
 plot_fdn_attenuation_filters(nDel, nSize, fs, b, a, col, ls);

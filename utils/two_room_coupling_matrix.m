@@ -1,10 +1,14 @@
-function [A] = two_room_coupling_matrix(aperture, b_diff, areas, varargin)
+function [A] = two_room_coupling_matrix(nGrp, aperture, area, absorp_coef, fs, c, filter_type, varargin)
 
 %% Coupling matrix for two coupled rooms
 % INPUTS:
+% nGrp - number of groups in FDN (2, in this case)
 % aperture : aperture radius (in metre)
-% b_diff : FIR diiffraction filter coefficients (vector)
-% areas : areas of 2 rooms (vector)
+% area : surface areas of 2 rooms 
+% absorp_coeff : absorption coefficients in the 2 rooms
+% fs - samplng rate
+% c - speed of sound in air
+% filter_type - exact or PM
 % OPTIONAL:
 % asymmetry : 0 or 1, whether to have asymmetric coupling (boolean)
 % OUTPUTS:
@@ -15,20 +19,20 @@ p.KeepUnmatched = true;
 addParameter(p, 'asymmetry', 1);
 parse(p,varargin{:});
 asymmetry = p.Results.asymmetry;
-addpath('fdnToolbox/.');
 
-S1 = areas(1); S2 = areas(2);
-N = 2;
+% create some FIR coupling filters 
+[b_diff, ~, ~] = design_diffraction_filter(aperture, fs, c, filter_type);
+coupling_areas = absorp_coef.*area + (pi*aperture^2).*(ones(nGrp,1)-absorp_coef);
+S1 = coupling_areas(1); S2 = coupling_areas(2);
 
-% Create some coupling filters with Bartlett windows
 couplingLength = length(b_diff); % should be all odd
 % add coupling gains
 couplingGain = (pi*aperture^2)/sqrt(S1*S2);
 
 % build up coupling filter matrix
-A = zeros(N,N,couplingLength);
-for i = 1:N
-    for j = i+1:N
+A = zeros(nGrp,nGrp,couplingLength);
+for i = 1:nGrp
+    for j = i+1:nGrp
         w = b_diff;
         g = couplingGain;
         z = zeros(couplingLength,1);
@@ -43,8 +47,6 @@ end
 alpha = squeeze(A(1,2,:));
 aa = conv(alpha, flip(alpha));
 aa1 = aa;
-% aa1(ceil(end/2)) = 1-aa1(ceil(end/2));
-% aa1 = -aa1;
 
 % find roots and invert those within unit circle
 % ra = roots(aa1);

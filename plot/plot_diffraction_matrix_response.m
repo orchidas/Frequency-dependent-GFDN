@@ -35,13 +35,10 @@ colors =  [[0    0.4470    0.7410];
         [0.3010    0.7450    0.9330];
         [0.6350    0.0780    0.1840]];
 
-figure('Units','inches', 'Position',[0 0 3.25 3.3],'PaperPositionMode','auto');
 
 for k = 1:length(aperture)
-     [b_diff, ~, win_len] = design_diffraction_filter(aperture(k),fs,c,'exact');
-     absorbing_area = absorp_coef.*area + (pi*aperture(k)^2).*(ones(nRooms,1)-absorp_coef);
 
-     couplingMatrixTD = two_room_coupling_matrix(aperture(k), b_diff, absorbing_area, 'asymmetry', 0);
+     couplingMatrixTD = two_room_coupling_matrix(nRooms, aperture(k), area, absorp_coef, fs, c, 'exact', 'asymmetry', 0);
      couplingMatrixFD = fft(couplingMatrixTD, nbins*2, 3);
      
      if k < length(aperture)
@@ -58,24 +55,13 @@ for k = 1:length(aperture)
      end
    
      lgdstr{k} = ['a = ', num2str(round(aperture(k),3)), ' m'];
-%      drawnow; hold on;
 end
 set(plotAxes,'XScale','log');
 
-
-% add legend
-% Lgnd = legend(plotAxes(1,1), lgdstr, 'Location', 'northeast');
-% Lgnd.Position(2) = 0.6;
 
 Lgnd = legend(plotAxes(1),lgdstr);
 Lgnd.NumColumns = ceil(length(lgdstr)/2);
 Lgnd.Position(1:2) = [0.10 0.48];
 
-if save_flag
-%     exportgraphics(gcf, './figures/coupled_FDN_couplingMatrix.png', 'Resolution', 300);
-%     saveas(gcf,'figures/coupled_FDN_couplingMatrix.png');
-%     print('figures/coupled_FDN_couplingMatrix.eps', '-depsc');
-    exportgraphics(gcf,'./figures/coupled_FDN_couplingMatrix.pdf','BackgroundColor','none','ContentType','vector')
-end
 
 end
