@@ -3,8 +3,8 @@
 
 close all; 
 addpath('../.');
-addpath('plot/.')
-addpath('utils/.');
+addpath('../plot/.')
+addpath('../utils/.');
 addpath(genpath('fdnToolbox/.'));
 
 %sampling frequency
@@ -172,12 +172,13 @@ zAbsorption = zTF(absorption.b,absorption.a,'isDiagonal',true);
 M_block = get_block_mixing_matrix(nSize, nGrp, theta);
 
 % filter coupling matrix
-[couplingMatrix,S] = multiroom_coupling_matrix(nGrp, filter_coefs, aperture, coupling_areas);
+[couplingMatrix, ~, degree] = multiroom_coupling_matrix(nGrp, filter_coefs, aperture, coupling_areas);
 
 %% PRODUCES FIGURE 8B
 % plot T60 deviation
 
 fig = figure('Units','inches', 'Position',[0 0 3.29 2.2],'PaperPositionMode','auto');
+S = svdPerBin(fft(couplingMatrix,2*degree,3));
 min_dev = min(min(abs(S))).^(1/min(tau));
 max_dev = max(max(abs(S))).^(1/max(tau));
 

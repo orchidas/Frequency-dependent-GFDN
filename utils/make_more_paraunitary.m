@@ -20,7 +20,7 @@ for it = 1:size(AA,3)
     DD(:,:,it) = diag(sqrt(1 - E(:,it)));
 end
 
-squeeze(sum((AA+DD).^2,1)) % energy matches
+squeeze(sum((AA+DD).^2,1)); % energy matches
 
 % There a few sign options. Let's check which one is the best.
 signCombinations = logical_indices_for_power_set(nRooms*(nRooms-1));
@@ -76,15 +76,6 @@ function TT = signFlipVersion(TT,signComb)
    TT(1,3,:) = TT(1,3,:) * signComb(6);
 end
   
-function PP = svdPerBin(TT)
-
-    PP = zeros(size(TT,[1 3]));
-    for f = 1:size(TT,3)
-       s = (svd(TT(:,:,f)));  
-       PP(:,f) = s;
-    end
-end
-
 
 function PP = ProcrustesPerBin(TT)
 
