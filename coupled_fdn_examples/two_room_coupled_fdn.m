@@ -78,6 +78,7 @@ for i = 1:ndel
     [b(i,:),a(i,:)] = shelfeq(wt(ceil(i/nset)),[gamma_0;gamma_pi]);   
 end
 
+% colours and linestyle to be used for plotting
 col = [[0,0.447,0.741];[0.850,0.325,0.098];[0.929,0.694,0.125];[0 0 0]];
 ls = {'-.','-'};
 plot_fdn_attenuation_filters(ndel, nSize, fs, b, a, col, ls);
