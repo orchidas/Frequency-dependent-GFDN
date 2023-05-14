@@ -31,7 +31,7 @@ lis_pos = 2;
 d = 0;
 
 % whether to save RIRs
-saveRIR = false;
+saveRIR = true;
 
 % what plots to save
 plot_ir = false;
@@ -107,8 +107,8 @@ h_r2 = dss2impz(nsamp, tau(nset+1:end).', feedbackMatrix, inputGain, outputGain,
 
 % save results
 if saveRIR
-    audiowrite('audio/r1.wav',h_r1./max(abs(h_r1)),fs);
-    audiowrite('audio/r2.wav',h_r2./max(abs(h_r2)),fs);
+    audiowrite('../audio/r1.wav',h_r1./max(abs(h_r1)),fs);
+    audiowrite('../audio/r2.wav',h_r2./max(abs(h_r2)),fs);
 end
 
 %% loop through different aperture sizes
@@ -187,11 +187,11 @@ for i = 1:length(aperture)
     end
     %% play and save IR
     if saveRIR
-         audiowrite(['audio/coupled_aperture=',num2str(round(aperture(i),3)),...
-                    '_freq_', des,'.wav'], h_coup_freq./max(abs(h_coup_freq)),fs);
-         audiowrite(['audio/coupled_aperture=',num2str(round(aperture(i),3)),...
-                     '_', des,'.wav'], h_coup./max(abs(h_coup)),fs);
-         soundsc(h_coup,fs); pause(2); soundsc(h_coup_freq,fs);
+         audiowrite(['../audio/coupled_aperture=',num2str(round(aperture(i),3)),...
+                    '_freq_', des,'.wav'], h_coup_filter./max(abs(h_coup_filter)),fs);
+         audiowrite(['../audio/coupled_aperture=',num2str(round(aperture(i),3)),...
+                     '_', des,'.wav'], h_coup_scalar./max(abs(h_coup_scalar)),fs);
+         soundsc(h_coup_scalar,fs); pause(2); soundsc(h_coup_filter,fs);
     end
 
 end

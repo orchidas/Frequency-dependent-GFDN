@@ -1,4 +1,4 @@
-function [] = ftgram2N4S( x, fs, figtitle, saveflag )
+function [] = ftgram2N4S( x, fs, figtitle, subplot_labels, saveflag )
 % yields plot with nice labels
 % with four, 1/4 spectrograms
 
@@ -8,17 +8,16 @@ tempfig = figure;
 fig = figure('Units','inches', 'Position',[0 0 3.29 3.5],'PaperPositionMode','auto');
     set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
 
-nax(1) = subplot(4,1,1);
-    set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+for k = 1:4
+    nax(k) = subplot(4,1,k);
+    cax = gca;
+    set(cax, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+    if ~isempty(subplot_labels)
+        set(cax.Title, 'FontWeight', 'normal', 'String', subplot_labels{k});
 
-nax(2) = subplot(4,1,2);
-    set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
+    end
+end
 
-nax(3) = subplot(4,1,3);
-    set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
-
-nax(4) = subplot(4,1,4);
-    set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
 
 sg1 = get(ax(1), 'Children');
 copyobj(sg1, nax(1));
@@ -49,7 +48,7 @@ caxis([-60 0]);
 nax1p = get(nax(1), 'Position');
 nax1p(3) = 0.7; % adjust width to compenstate for color bar
 nax1p(2) = 0.8; % move upwards to make room for x label
-nax1p(4) = 0.18; % make subplots slightly larger
+nax1p(4) = 0.16; % make subplots slightly larger
 
 cbl = get(cb,'Position');
 cbl(1) = 0.84;
@@ -80,7 +79,7 @@ caxis([-60 0]);
 nax2p = get(nax(2), 'Position');
 nax2p(3) = 0.7; % adjust width to compenstate for color bar
 nax2p(2) = 0.58; % move upwards to make room for x label
-nax2p(4) = 0.18; % make subplots slightly larger
+nax2p(4) = 0.16; % make subplots slightly larger
 
 set(nax(2), 'Position', nax2p);
 
@@ -101,7 +100,7 @@ caxis([-60 0]);
 nax3p = get(nax(2), 'Position');
 nax3p(3) = 0.7; % adjust width to compenstate for color bar
 nax3p(2) = 0.36; % move upwards to make room for x label
-nax3p(4) = 0.18; % make subplots slightly larger
+nax3p(4) = 0.16; % make subplots slightly larger
 
 set(nax(3), 'Position', nax3p);
 
@@ -120,7 +119,7 @@ caxis([-60 0]);
 nax4p = get(nax(3), 'Position');
 nax4p(3) = 0.7; % adjust width to compenstate for color bar
 nax4p(2) = 0.14; % move upwards to make room for x label
-nax4p(4) = 0.18; % make subplots slightly larger
+nax4p(4) = 0.16; % make subplots slightly larger
 
 xlabel('Time (s)');
     set(gca, 'FontUnits','points', 'FontWeight','normal', 'FontSize',8, 'FontName','Times');
@@ -153,7 +152,6 @@ drawnow;
 
 
 if saveflag
-% audiowrite([figtitle(~isspace(figtitle)) '.wav'], 0.9*x/max(abs(x)), fs);
 print([figtitle(~isspace(figtitle)) '.png'], '-dpng');
 print([figtitle(~isspace(figtitle)) '.eps'], '-depsc');
 end

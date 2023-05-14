@@ -117,7 +117,7 @@ zAbsorption = zTF(absorption.b,absorption.a,'isDiagonal',true);
 M_block = get_block_mixing_matrix(nSize, nGrp, theta);
 
 % filter coupling matrix
-[couplingMatrix, ~, ~] = multiroom_coupling_matrix(fs, c, nGrp, aperture, absorp_coef, area, des);
+[couplingMatrix, ~, degree] = multiroom_coupling_matrix(fs, c, nGrp, aperture, absorp_coef, area, des);
 
 %% PRODUCES FIGURE 8B
 % plot T60 deviation
@@ -129,7 +129,6 @@ exportgraphics(gcf, '../figures/t60_error_bounds.pdf','BackgroundColor','none','
 %% generate impulse response
 
 % feedback matrix
-degree = max(max(win_len));
 feedbackMatrix = zeros(nDel, nDel, degree);
 for k = 1:degree
     feedbackMatrix(:,:,k) =  kron(couplingMatrix(:,:,k), ones(nDel/nGrp, nDel/nGrp)) .* M_block;
@@ -144,8 +143,9 @@ h_coup_freq_fdntb = dss2impz(nsamp, tau.', real(feedbackMatrix), b_drive, output
 %% PRODUCES FIGURE 8C
 % plot spectrograms
 
+subplot_labels = {'Room 1', 'Room 2', 'Room 3', 'Coupled rooms'};
 ftgram2N4S([h_rooms, h_coup_freq_fdntb(:,3)./max(abs(h_coup_freq_fdntb(:,3)))], ...
-    fs, '../figures/multiroom_spec_causal', true);
+    fs, '../figures/multiroom_spec_causal', subplot_labels, true);
 
 
 %% save impulse responses
